@@ -361,44 +361,44 @@
             // -------- form validation end ---------
             // display data in table
             function dataDisplay() {
+                personDetails ? 
                 personDetails.map((val,ind) => {
-                    let tableRow = $(`<tr id="${ind}"></tr>`).html(
-                        `<td>${val.fName + ' ' + val.lName}</td>
-                        <td>${val.mailId}</td>
-                        <td class="text-end">
-                            <div class="btn-group">
-                                <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></button>
-                                <ul class="dropdown-menu">
-                                    <li><button class="dropdown-item editbtn" id="${ind}">Edit</button></li>
-                                    <li><button class="dropdown-item deletebtn" id="${ind}">Delete</button></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><button class="dropdown-item viewbtn" id="${ind}">View Details</button></li>
-                                </ul>
-                            </div>
-                        </td>`
+                    let tableRow = $('<tr></tr>', {'id': ind}).append('<td>' + val.fName + ' ' + val.lName + '</td>' + 
+                        '<td>' + val.mailId + '</td>'+
+                        '<td class="text-end">'+
+                            '<div class="btn-group">' +
+                            '<button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></button>' +
+                                '<ul class="dropdown-menu">' +
+                                    '<li><button class="dropdown-item editbtn" id=' + ind + '>Edit</button></li>' +
+                                    '<li><button class="dropdown-item deletebtn" id=' + ind + '>Delete</button></li>' +
+                                    '<li><hr class="dropdown-divider"></li>' +
+                                    '<li><button class="dropdown-item viewbtn" id=' + ind + '>View Details</button></li>' +
+                                '</ul>' +
+                            '</div>' +
+                        '</td>'
                     );
-                    console.log(ind,'ind datadisplay')
                     $('.tableBody').append(tableRow);
-                });
+                })
+                : localStorage.setItem('person',JSON.stringify(personDetails = []));
             }
             dataDisplay();
 
             // handlesubmit function for edit-submit repeated code
             function handleSubmit(firstName,lastName,emailId,indexNumber){
                 console.log(indexNumber,'indexNumber')
-                return `<td>${firstName + ' ' + lastName}</td>
-                <td>${emailId}</td>
-                <td class="text-end">
-                    <div class="btn-group">
-                        <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></button>
-                        <ul class="dropdown-menu">
-                            <li><button class="dropdown-item editbtn" id="${indexNumber}">Edit</button></li>
-                            <li><button class="dropdown-item deletebtn" id="${indexNumber}">Delete</button></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><button class="dropdown-item viewbtn" id="${indexNumber}">View Details</button></li>
-                        </ul>
-                    </div>
-                </td>`
+                return '<td>' + firstName + ' ' + lastName + '</td>' + 
+                    '<td>' + emailId + '</td>'+
+                    '<td class="text-end">'+
+                        '<div class="btn-group">' +
+                        '<button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></button>' +
+                            '<ul class="dropdown-menu">' +
+                                '<li><button class="dropdown-item editbtn" id=' + indexNumber + '>Edit</button></li>' +
+                                '<li><button class="dropdown-item deletebtn" id=' + indexNumber + '>Delete</button></li>' +
+                                '<li><hr class="dropdown-divider"></li>' +
+                                '<li><button class="dropdown-item viewbtn" id=' + indexNumber + '>View Details</button></li>' +
+                            '</ul>' +
+                        '</div>' +
+                    '</td>'
             }
 
             let fName = $('#firstNameInput').val();
@@ -409,10 +409,11 @@
             let birthDate = $('#dobInput').val();
             // submit details
             function submitDetails() {
+                getLocalData = JSON.parse(localStorage.getItem('person'));
                 let getLocalLength = getLocalData.length;
                 let index = getLocalLength > 0 ? getLocalLength - 1 : getLocalLength;
 
-                let tableRow = $(`<tr id="${index}"></tr>`).html(
+                let tableRow = $('<tr></tr>',{'id' : index}).append(
                     handleSubmit(fName,lName,mailId,index)
                 );
                 console.log(index,'submit index');
