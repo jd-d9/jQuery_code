@@ -165,15 +165,10 @@
             let personDetails = [];
             let personObject = {};
             let getLocalData = JSON.parse(localStorage.getItem('person'));
-            getLocalData == [] ? personDetails = [] : personDetails = getLocalData;  // getLocalData.length -------------------------------------------------------
-            // modal show
-            function modalOpen() {
-                $('#staticBackdrop').modal('show');
-            }
-            // modal hide
-            function modalClose() {
-                $('#staticBackdrop').modal('hide');
-                clearInputValue();
+            getLocalData ? personDetails = getLocalData : localStorage.setItem('person',JSON.stringify(personDetails = []));
+            // set local storage
+            function setLocalData() {
+                localStorage.setItem('person',JSON.stringify(personDetails));
             }
             // clear input data
             function clearInputValue() {
@@ -183,9 +178,17 @@
                 $('#staticBackdropLabel').text('Add Details');
                 $('.submitButton').css('display','block');
             }
-            // set local storage
-            function setLocalData() {
-                localStorage.setItem('person',JSON.stringify(personDetails));
+            let forEditDataToggle = false;
+            // modal show
+            function modalOpen() {
+                $('#staticBackdrop').modal('show');
+                forEditDataToggle = false;
+            }
+            // modal hide
+            function modalClose() {
+                $('#staticBackdrop').modal('hide');
+                clearInputValue();
+                forEditDataToggle = false;
             }
             $(".addButton").click(modalOpen);
             $(".closeButton").click(modalClose);
@@ -206,30 +209,30 @@
             let errorDate = false;
 
             $('#firstNameInput').focusout((e) => {
-                checkFname(e);
+                checkFname(e.target.value);
             });
             $('#lastNameInput').focusout((e) => {
-                checkLname(e);
+                checkLname(e.target.value);
             });
             $('#emailInput').focusout((e) => {
-                checkEmail(e);
+                checkEmail(e.target.value);
             });
             $('#phonrNumberInput').focusout((e) => {
-                checkPhone(e);
+                checkPhone(e.target.value);
             });
             $('#addressInput').focusout((e) => {
-                checkAddress(e);
+                checkAddress(e.target.value);
             });
             $('#dobInput').focusout((e) => {
-                checkDate(e);
+                checkDate(e.target.value);
             });
 
-            function checkFname(e) {
-                let fnamePattern = /^[a-zA-Z]*$/;
-                let fNameVal = e.target.value;                                  // currently working on it
-                // let fName = $('#firstNameInput').val();
-                console.log(fNameVal,'fnameval')
-                if(fnamePattern.test(fNameVal) && fNameVal != ''){
+            function checkFname(fNameVal) {
+                const existingFname = personDetails.filter((value) => {
+                    return (value.fName).toLowerCase() == fNameVal.toLowerCase();
+                });
+                const fnamePattern = /^[a-zA-Z]*$/;
+                if(fnamePattern.test(fNameVal) && fNameVal != '' && existingFname.length == 0){
                     $('#fNameError').hide();
                     $('#firstNameInput').css('border','');
                 }
@@ -239,10 +242,12 @@
                     errorFname = true;
                 }
             }
-            function checkLname() {
-                let lnamePattern = /^[a-zA-Z]*$/;
-                let lName = $('#lastNameInput').val();
-                if(lnamePattern.test(lName) && lName != ''){
+            function checkLname(lNameVal) {
+                const existingLname = personDetails.filter((value) => {
+                    return (value.lName).toLowerCase() == lNameVal.toLowerCase();
+                });
+                const lnamePattern = /^[a-zA-Z]*$/;
+                if(lnamePattern.test(lNameVal) && lNameVal != '' && existingLname.length == 0){
                     $('#lNameError').hide();
                     $('#lastNameInput').css('border','');
                 }
@@ -252,10 +257,12 @@
                     errorLname = true;
                 }
             }
-            function checkEmail() {
-                let mailPattern = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
-                let mailId = $('#emailInput').val();
-                if(mailPattern.test(mailId) && mailId != ''){
+            function checkEmail(mailVal) {
+                const existingMail = personDetails.filter((value) => {
+                    return (value.mailId).toLowerCase() == mailVal.toLowerCase();
+                });
+                const mailPattern = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+                if(mailPattern.test(mailVal) && mailVal != '' && existingMail.length == 0){
                     $('#emailError').hide();
                     $('#emailInput').css('border','');
                 }
@@ -265,10 +272,12 @@
                     errorEmail = true;
                 }
             }
-            function checkPhone() {
-                let phonePattern = /^[0-9_+ ]{10,}$/
-                let phoneNo = $('#phonrNumberInput').val();
-                if(phonePattern.test(phoneNo) && phoneNo != ''){
+            function checkPhone(phoneVal) {
+                const existingPhone = personDetails.filter((value) => {
+                    return (value.phoneNo).toLowerCase() == phoneVal.toLowerCase();
+                });
+                const phonePattern = /^[0-9_+ ]{10,}$/
+                if(phonePattern.test(phoneVal) && phoneVal != '' && existingPhone.length == 0){
                     $('#phoneError').hide();
                     $('#phonrNumberInput').css('border','');
                 }
@@ -278,9 +287,11 @@
                     errorPhone = true;
                 }
             }
-            function checkAddress() {
-                let address = $('#addressInput').val();
-                if(address != ''){
+            function checkAddress(addressVal) {
+                const existingAddress = personDetails.filter((value) => {
+                    return (value.address).toLowerCase() == addressVal.toLowerCase();
+                });
+                if(addressVal != '' && existingAddress.length == 0){
                     $('#addressError').hide();
                     $('#addressInput').css('border','');
                 }
@@ -290,9 +301,11 @@
                     errorAddress = true;
                 }
             }
-            function checkDate() {
-                let birthDate = $('#dobInput').val();
-                if(birthDate != ''){
+            function checkDate(birthVal) {
+                const existingBirthDate = personDetails.filter((value) => {
+                    return (value.birthDate).toLowerCase() == birthVal.toLowerCase();
+                });
+                if(birthVal != '' && existingBirthDate.length == 0){
                     $('#dateError').hide();
                     $('#dobInput').css('border','');
                 }
@@ -302,6 +315,7 @@
                     errorDate = true;
                 }
             }
+            
             $('#detailsForm').submit(function(event) {
                 event.preventDefault();
 
@@ -312,33 +326,44 @@
                 errorAddress = false;
                 errorDate = false;
 
-                checkFname(event);
-                checkLname();
-                checkEmail();
-                checkPhone();
-                checkAddress();
-                checkDate();
-
-                fName = event.target.value;
-                // fName = $('#firstNameInput').val();
+                fName = $('#firstNameInput').val();
                 lName = $('#lastNameInput').val();
                 mailId = $('#emailInput').val();
                 phoneNo = $('#phonrNumberInput').val();
                 address = $('#addressInput').val();
                 birthDate = $('#dobInput').val();
 
+                checkFname(fName);
+                checkLname(lName);
+                checkEmail(mailId);
+                checkPhone(phoneNo);
+                checkAddress(address);
+                checkDate(birthDate);
+
                 if(errorFname == false && errorLname == false && errorEmail == false && errorPhone == false && errorAddress == false && errorDate == false){
                     // submit edited value
-                    if(editValue !== ''){
+                    if(editValue !== '' && forEditDataToggle == true){
                         let editArray = personDetails.map((val,ind) => {
                             if(ind == editIndex){
                                 return {fName, lName, mailId, phoneNo, address, birthDate}
                             }
                             return val
                         })
-                        $(`.tableBody > tr#${editIndex}`).html(           // currently working on it
-                            handleSubmit(fName,lName,mailId,editIndex)
-                        )
+                        $('.tableBody > tr#' + editIndex).html(
+                            '<td>' + fName + ' ' + lName + '</td>' + 
+                            '<td>' + mailId + '</td>' +
+                            '<td class="text-end">' +
+                                '<div class="btn-group btnClickable">' +
+                                '<button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></button>' +
+                                    '<ul class="dropdown-menu">' +
+                                        '<li><button class="dropdown-item editbtn" id=' + editIndex + '>Edit</button></li>' +
+                                        '<li><button class="dropdown-item deletebtn" id=' + editIndex + '>Delete</button></li>' +
+                                        '<li><hr class="dropdown-divider"></li>' +
+                                        '<li><button class="dropdown-item viewbtn" id=' + editIndex + '>View Details</button></li>' +
+                                    '</ul>' +
+                                '</div>' +
+                            '</td>'
+                        );
                         console.log(editIndex,'editIndex 33')
                         personDetails = editArray;
                         setLocalData();
@@ -363,9 +388,8 @@
             // -------- form validation end ---------
             // display data in table
             function dataDisplay() {
-                personDetails ? 
                 personDetails.map((val,ind) => {
-                    let tableRow = $('<tr></tr>', {'id': ind}).append('<td>' + val.fName + ' ' + val.lName + '</td>' + 
+                    const tableRow = $('<tr></tr>', {'id': ind}).append('<td>' + val.fName + ' ' + val.lName + '</td>' + 
                         '<td>' + val.mailId + '</td>'+
                         '<td class="text-end">'+
                             '<div class="btn-group btnClickable">' +
@@ -374,35 +398,32 @@
                                     '<li><button class="dropdown-item editbtn" id=' + ind + '>Edit</button></li>' +
                                     '<li><button class="dropdown-item deletebtn" id=' + ind + '>Delete</button></li>' +
                                     '<li><hr class="dropdown-divider"></li>' +
-                                    '<li class="viewbtnLi"><button class="dropdown-item viewbtn" id=' + ind + '>View Details</button></li>' +
+                                    '<li><button class="dropdown-item viewbtn" id=' + ind + '>View Details</button></li>' +
                                 '</ul>' +
                             '</div>' +
                         '</td>'
                     );
                     $('.tableBody').append(tableRow);
                 })
-                : localStorage.setItem('person',JSON.stringify(personDetails = []));
             }
             dataDisplay();
-
             // handlesubmit function for edit-submit repeated code
             function handleSubmit(firstName,lastName,emailId,indexNumber){
-                console.log(indexNumber,'indexNumber')
-                return '<tr id='+ indexNumber +'>'+
-                        '<td>' + firstName + ' ' + lastName + '</td>' + 
-                        '<td>' + emailId + '</td>'+
-                        '<td class="text-end">'+
-                            '<div class="btn-group btnClickable">' +
-                            '<button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></button>' +
-                                '<ul class="dropdown-menu">' +
-                                    '<li><button class="dropdown-item editbtn" id=' + indexNumber + '>Edit</button></li>' +
-                                    '<li><button class="dropdown-item deletebtn" id=' + indexNumber + '>Delete</button></li>' +
-                                    '<li><hr class="dropdown-divider"></li>' +
-                                    '<li class="viewbtnLi"><button class="dropdown-item viewbtn" id=' + indexNumber + '>View Details</button></li>' +
-                                '</ul>' +
-                            '</div>' +
-                        '</td>'+
-                    '</tr>'
+                return '<tr id='+ indexNumber +'>' +
+                    '<td>' + firstName + ' ' + lastName + '</td>' + 
+                    '<td>' + emailId + '</td>' +
+                    '<td class="text-end">' +
+                        '<div class="btn-group btnClickable">' +
+                        '<button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></button>' +
+                            '<ul class="dropdown-menu">' +
+                                '<li><button class="dropdown-item editbtn" id=' + indexNumber + '>Edit</button></li>' +
+                                '<li><button class="dropdown-item deletebtn" id=' + indexNumber + '>Delete</button></li>' +
+                                '<li><hr class="dropdown-divider"></li>' +
+                                '<li><button class="dropdown-item viewbtn" id=' + indexNumber + '>View Details</button></li>' +
+                            '</ul>' +
+                        '</div>' +
+                    '</td>' +
+                '</tr>'
             }
 
             let fName = $('#firstNameInput').val();
@@ -414,39 +435,40 @@
             // submit details
             function submitDetails() {
                 getLocalData = JSON.parse(localStorage.getItem('person'));
-                let getLocalLength = getLocalData.length;
-                let index = getLocalLength //> 0 ? getLocalLength - 1 : getLocalLength;
-
-                console.log(index,'submit index');
+                const index = getLocalData.length //> 0 ? getLocalLength - 1 : getLocalLength;
                 $('.tableBody').append(
                     handleSubmit(fName,lName,mailId,index)
                 );
             }
             // for delete
             $('.tableBody').on('click','.deletebtn', function(event) {
-                let index = event.target.id;
-                let deleteIndex = personDetails.findIndex((value,ind) => {
+                const index = event.target.id;
+                const deleteIndex = personDetails.findIndex((value,ind) => {
                     return ind == index
                 });
+                let deleteIndexChange = personDetails.filter((value,ind) => {
+                    return ind != index
+                });
+                console.log(deleteIndexChange,'deleteIndexChange')                      // currently working on it.-------------------------------------------
                 console.log(deleteIndex,'deleteIndex')
                 console.log(index,'index---delete')
-                $(`.tableBody > tr[id = '${deleteIndex}']`).remove();
-                personDetails.splice(deleteIndex, 1);
-                setLocalData();
+
+                // $('.tableBody > tr#' + deleteIndex).remove();
+                // personDetails.splice(deleteIndex, 1);
+                // setLocalData();
             });
             //for get value in input field when click on edit button
             let editValue = ''
             let editIndex = ''
             $('.tableBody').on('click','.editbtn',function(event) {
-                let editInd = event.target.id;
+                forEditDataToggle = true;
+                const editInd = event.target.id;
                 editIndex = personDetails.findIndex((value,ind) => {
                     return ind == editInd
                 });
                 editValue = personDetails.filter((value,ind) => {
                     return ind == editIndex
                 });
-                console.log(editValue,'editValue')
-                console.log(editIndex,'findIndex editindex')
                 modalOpen();
                 $('#firstNameInput').val(editValue[0].fName);
                 $('#lastNameInput').val(editValue[0].lName);
@@ -457,14 +479,10 @@
             });
             //for view
             $('.tableBody').on('click','.viewbtn',function(event) {
-                console.log()
-                console.log(event,'event')
-                let viewIndex = event.target.id;
-                let viewValue = personDetails.filter((value,ind) => {
+                const viewIndex = event.target.id;
+                const viewValue = personDetails.filter((value,ind) => {
                     return ind == viewIndex
                 });
-                console.log(viewIndex,'viewindex');
-                console.log(viewValue,'viewvalue');
                 modalOpen();
                 $('input').attr('readonly','readonly');
                 $('#addressInput').attr('readonly','readonly');
