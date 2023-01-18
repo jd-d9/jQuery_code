@@ -164,9 +164,8 @@
         $(document).ready(function() {
             let personDetails = [];
             let personObject = {};
-            // let setLocalDataOne = localStorage.setItem('person',JSON.stringify(personDetails));
             let getLocalData = JSON.parse(localStorage.getItem('person'));
-            getLocalData == [] ? personDetails = [] : personDetails = getLocalData;
+            getLocalData == [] ? personDetails = [] : personDetails = getLocalData;  // getLocalData.length -------------------------------------------------------
             // modal show
             function modalOpen() {
                 $('#staticBackdrop').modal('show');
@@ -206,29 +205,31 @@
             let errorAddress = false;
             let errorDate = false;
 
-            $('#firstNameInput').focusout(() => {
-                checkFname();
+            $('#firstNameInput').focusout((e) => {
+                checkFname(e);
             });
-            $('#lastNameInput').focusout(() => {
-                checkLname();
+            $('#lastNameInput').focusout((e) => {
+                checkLname(e);
             });
-            $('#emailInput').focusout(() => {
-                checkEmail();
+            $('#emailInput').focusout((e) => {
+                checkEmail(e);
             });
-            $('#phonrNumberInput').focusout(() => {
-                checkPhone();
+            $('#phonrNumberInput').focusout((e) => {
+                checkPhone(e);
             });
-            $('#addressInput').focusout(() => {
-                checkAddress();
+            $('#addressInput').focusout((e) => {
+                checkAddress(e);
             });
-            $('#dobInput').focusout(() => {
-                checkDate();
+            $('#dobInput').focusout((e) => {
+                checkDate(e);
             });
 
-            function checkFname() {
+            function checkFname(e) {
                 let fnamePattern = /^[a-zA-Z]*$/;
-                let fName = $('#firstNameInput').val();
-                if(fnamePattern.test(fName) && fName != ''){
+                let fNameVal = e.target.value;                                  // currently working on it
+                // let fName = $('#firstNameInput').val();
+                console.log(fNameVal,'fnameval')
+                if(fnamePattern.test(fNameVal) && fNameVal != ''){
                     $('#fNameError').hide();
                     $('#firstNameInput').css('border','');
                 }
@@ -311,14 +312,15 @@
                 errorAddress = false;
                 errorDate = false;
 
-                checkFname();
+                checkFname(event);
                 checkLname();
                 checkEmail();
                 checkPhone();
                 checkAddress();
                 checkDate();
 
-                fName = $('#firstNameInput').val();
+                fName = event.target.value;
+                // fName = $('#firstNameInput').val();
                 lName = $('#lastNameInput').val();
                 mailId = $('#emailInput').val();
                 phoneNo = $('#phonrNumberInput').val();
@@ -334,7 +336,7 @@
                             }
                             return val
                         })
-                        $(`.tableBody > tr[id = '${editIndex}']`).html(
+                        $(`.tableBody > tr#${editIndex}`).html(           // currently working on it
                             handleSubmit(fName,lName,mailId,editIndex)
                         )
                         console.log(editIndex,'editIndex 33')
@@ -366,13 +368,13 @@
                     let tableRow = $('<tr></tr>', {'id': ind}).append('<td>' + val.fName + ' ' + val.lName + '</td>' + 
                         '<td>' + val.mailId + '</td>'+
                         '<td class="text-end">'+
-                            '<div class="btn-group">' +
+                            '<div class="btn-group btnClickable">' +
                             '<button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></button>' +
                                 '<ul class="dropdown-menu">' +
                                     '<li><button class="dropdown-item editbtn" id=' + ind + '>Edit</button></li>' +
                                     '<li><button class="dropdown-item deletebtn" id=' + ind + '>Delete</button></li>' +
                                     '<li><hr class="dropdown-divider"></li>' +
-                                    '<li><button class="dropdown-item viewbtn" id=' + ind + '>View Details</button></li>' +
+                                    '<li class="viewbtnLi"><button class="dropdown-item viewbtn" id=' + ind + '>View Details</button></li>' +
                                 '</ul>' +
                             '</div>' +
                         '</td>'
@@ -386,19 +388,21 @@
             // handlesubmit function for edit-submit repeated code
             function handleSubmit(firstName,lastName,emailId,indexNumber){
                 console.log(indexNumber,'indexNumber')
-                return '<td>' + firstName + ' ' + lastName + '</td>' + 
-                    '<td>' + emailId + '</td>'+
-                    '<td class="text-end">'+
-                        '<div class="btn-group">' +
-                        '<button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></button>' +
-                            '<ul class="dropdown-menu">' +
-                                '<li><button class="dropdown-item editbtn" id=' + indexNumber + '>Edit</button></li>' +
-                                '<li><button class="dropdown-item deletebtn" id=' + indexNumber + '>Delete</button></li>' +
-                                '<li><hr class="dropdown-divider"></li>' +
-                                '<li><button class="dropdown-item viewbtn" id=' + indexNumber + '>View Details</button></li>' +
-                            '</ul>' +
-                        '</div>' +
-                    '</td>'
+                return '<tr id='+ indexNumber +'>'+
+                        '<td>' + firstName + ' ' + lastName + '</td>' + 
+                        '<td>' + emailId + '</td>'+
+                        '<td class="text-end">'+
+                            '<div class="btn-group btnClickable">' +
+                            '<button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></button>' +
+                                '<ul class="dropdown-menu">' +
+                                    '<li><button class="dropdown-item editbtn" id=' + indexNumber + '>Edit</button></li>' +
+                                    '<li><button class="dropdown-item deletebtn" id=' + indexNumber + '>Delete</button></li>' +
+                                    '<li><hr class="dropdown-divider"></li>' +
+                                    '<li class="viewbtnLi"><button class="dropdown-item viewbtn" id=' + indexNumber + '>View Details</button></li>' +
+                                '</ul>' +
+                            '</div>' +
+                        '</td>'+
+                    '</tr>'
             }
 
             let fName = $('#firstNameInput').val();
@@ -411,16 +415,15 @@
             function submitDetails() {
                 getLocalData = JSON.parse(localStorage.getItem('person'));
                 let getLocalLength = getLocalData.length;
-                let index = getLocalLength > 0 ? getLocalLength - 1 : getLocalLength;
+                let index = getLocalLength //> 0 ? getLocalLength - 1 : getLocalLength;
 
-                let tableRow = $('<tr></tr>',{'id' : index}).append(
+                console.log(index,'submit index');
+                $('.tableBody').append(
                     handleSubmit(fName,lName,mailId,index)
                 );
-                console.log(index,'submit index');
-                $('.tableBody').append(tableRow);
             }
             // for delete
-            $('.deletebtn').click(function(event) {
+            $('.tableBody').on('click','.deletebtn', function(event) {
                 let index = event.target.id;
                 let deleteIndex = personDetails.findIndex((value,ind) => {
                     return ind == index
@@ -434,7 +437,7 @@
             //for get value in input field when click on edit button
             let editValue = ''
             let editIndex = ''
-            $('.editbtn').click(function(event) {
+            $('.tableBody').on('click','.editbtn',function(event) {
                 let editInd = event.target.id;
                 editIndex = personDetails.findIndex((value,ind) => {
                     return ind == editInd
@@ -453,10 +456,11 @@
                 $('#dobInput').val(editValue[0].birthDate);
             });
             //for view
-            $('.viewbtn').click((event) => {
-                console.log(event,'jgi')
+            $('.tableBody').on('click','.viewbtn',function(event) {
+                console.log()
+                console.log(event,'event')
                 let viewIndex = event.target.id;
-                viewValue = personDetails.filter((value,ind) => {
+                let viewValue = personDetails.filter((value,ind) => {
                     return ind == viewIndex
                 });
                 console.log(viewIndex,'viewindex');
@@ -472,7 +476,7 @@
                 $('#phonrNumberInput').val(viewValue[0].phoneNo);
                 $('#addressInput').val(viewValue[0].address);
                 $('#dobInput').val(viewValue[0].birthDate);
-            })
+            });
         })
     </script>
 </body>
