@@ -100,18 +100,19 @@
                                 <button type="button" class="btn-close closeButton"></button>
                             </div>
                             <div class="modal-body">
+                                <!-- form start here -->
                                 <form id="detailsForm">
                                     <div class="row mb-3">
                                         <div class="col-md-6">
                                             <div>
-                                                <label for="firstNameInput" class="form-label">First Name</label>
+                                                <label for="firstNameInput" class="form-label">First Name <span class="text-danger">*</span></label>
                                                 <input type="text" class="form-control" placeholder="Enter first name" id="firstNameInput">
                                                 <em class="text-danger" id="fNameError"></em>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div>
-                                                <label for="lastNameInput" class="form-label">Last Name</label>
+                                                <label for="lastNameInput" class="form-label">Last Name <span class="text-danger">*</span></label>
                                                 <input type="text" class="form-control" placeholder="Enter last name" id="lastNameInput">
                                                 <em class="text-danger" id="lNameError"></em>
                                             </div>
@@ -120,14 +121,14 @@
                                     <div class="row mb-3">
                                         <div class="col-md-6">
                                             <div>
-                                                <label for="emailInput" class="form-label">Mail Id</label>
+                                                <label for="emailInput" class="form-label">Mail Id <span class="text-danger">*</span></label>
                                                 <input type="email" class="form-control" placeholder="Enter your email" id="emailInput">
                                                 <em class="text-danger" id="emailError"></em>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div>
-                                                <label for="phonrNumberInput" class="form-label">Phone No.</label>
+                                                <label for="phonrNumberInput" class="form-label">Phone No <span class="text-danger">*</span></label>
                                                 <input type="tel" class="form-control" placeholder="Enter mobile number" id="phonrNumberInput">
                                                 <em class="text-danger" id="phoneError"></em>
                                             </div>
@@ -136,14 +137,14 @@
                                     <div class="row mb-4">
                                         <div class="col-12 mb-3">
                                             <div>
-                                                <label for="addressInput" class="form-label">Address</label>
+                                                <label for="addressInput" class="form-label">Address <span class="text-danger">*</span></label>
                                                 <textarea class="form-control" rows="4" placeholder="Enter your address" id="addressInput"></textarea>
                                                 <em class="text-danger" id="addressError"></em>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div>
-                                                <label for="dobInput" class="form-label">Date of Birth</label>
+                                                <label for="dobInput" class="form-label">Date of Birth <span class="text-danger">*</span></label>
                                                 <input type="date" class="form-control" id="dobInput">
                                                 <em class="text-danger" id="dateError"></em>
                                             </div>
@@ -151,6 +152,7 @@
                                     </div>
                                     <button type="submit" class="btn submitButton w-100">Submit</button>
                                 </form>
+                                <!-- form end here -->
                             </div>
                         </div>
                     </div>
@@ -170,7 +172,7 @@
             function setLocalData() {
                 localStorage.setItem('person',JSON.stringify(personDetails));
             }
-            // clear input field value
+            // clear input field value 
             function clearInputValue() {
                 $('input').val('').removeAttr('readonly').css('border','');
                 $('#addressInput').val('').removeAttr('readonly').css('border','');
@@ -239,7 +241,7 @@
                     $('#firstNameInput').css('border','');
                 }
                 else{
-                    $('#fNameError').html('Please enter first name').show();
+                    $('#fNameError').html('Please enter first name or check for already exist or not !').show();
                     $('#firstNameInput').css('border','1px solid red');
                     errorFname = true;
                 }
@@ -254,7 +256,7 @@
                     $('#lastNameInput').css('border','');
                 }
                 else{
-                    $('#lNameError').html('Please enter last name').show();
+                    $('#lNameError').html('Please enter last name or check for already exist or not !').show();
                     $('#lastNameInput').css('border','1px solid red');
                     errorLname = true;
                 }
@@ -269,7 +271,7 @@
                     $('#emailInput').css('border','');
                 }
                 else{
-                    $('#emailError').html('Please enter valid email').show();
+                    $('#emailError').html('Please enter valid email or check for already exist or not !').show();
                     $('#emailInput').css('border','1px solid red');
                     errorEmail = true;
                 }
@@ -278,13 +280,13 @@
                 const existingPhone = personDetails.filter((value) => {
                     return (value.phoneNo).toLowerCase() == phoneVal.toLowerCase();
                 });
-                const phonePattern = /^[0-9_+ ]{10,}$/
+                const phonePattern = /^[0-9_+ -]{10,14}$/
                 if(phonePattern.test(phoneVal) && phoneVal != '' && existingPhone.length == 0){
                     $('#phoneError').hide();
                     $('#phonrNumberInput').css('border','');
                 }
                 else{
-                    $('#phoneError').html('Please enter valid number').show();
+                    $('#phoneError').html('Please enter valid number or check for already exist or not !').show();
                     $('#phonrNumberInput').css('border','1px solid red');
                     errorPhone = true;
                 }
@@ -298,7 +300,7 @@
                     $('#addressInput').css('border','');
                 }
                 else{
-                    $('#addressError').html('Please enter address').show();
+                    $('#addressError').html('Please enter address or check for already exist or not !').show();
                     $('#addressInput').css('border','1px solid red');
                     errorAddress = true;
                 }
@@ -312,12 +314,12 @@
                     $('#dobInput').css('border','');
                 }
                 else{
-                    $('#dateError').html('Please enter date of birth').show();
+                    $('#dateError').html('Please enter date of birth or check for already exist or not !').show();
                     $('#dobInput').css('border','1px solid red');
                     errorDate = true;
                 }
             }
-            
+
             $('#detailsForm').submit(function(event) {
                 event.preventDefault();
 
@@ -453,7 +455,8 @@
                     return ind == editIndex
                 });
                 modalOpen();
-                $('.submitButton').text('Update');
+                $('.submitButton').text('Save');
+                $('#staticBackdropLabel').text('Edit Details');
                 $('#firstNameInput').val(editValue[0].fName);
                 $('#lastNameInput').val(editValue[0].lName);
                 $('#emailInput').val(editValue[0].mailId);
@@ -470,8 +473,8 @@
                 modalOpen();
                 $('input').attr('readonly','readonly');
                 $('#addressInput').attr('readonly','readonly');
-                $('#staticBackdropLabel').text('View Details');
                 $('.submitButton').css('display','none');
+                $('#staticBackdropLabel').text('View Details');
                 $('#firstNameInput').val(viewValue[0].fName);
                 $('#lastNameInput').val(viewValue[0].lName);
                 $('#emailInput').val(viewValue[0].mailId);
