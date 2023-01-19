@@ -182,7 +182,6 @@
             // modal show
             function modalOpen() {
                 $('#staticBackdrop').modal('show');
-                forEditDataToggle = false;
             }
             // modal hide
             function modalClose() {
@@ -190,7 +189,10 @@
                 clearInputValue();
                 forEditDataToggle = false;
             }
-            $(".addButton").click(modalOpen);
+            $(".addButton").click(() => {
+                modalOpen();
+                forEditDataToggle = false;
+            });
             $(".closeButton").click(modalClose);
 
             // -------- form validation start ---------
@@ -349,22 +351,7 @@
                             }
                             return val
                         })
-                        $('.tableBody > tr#' + editIndex).html(
-                            '<td>' + fName + ' ' + lName + '</td>' + 
-                            '<td>' + mailId + '</td>' +
-                            '<td class="text-end">' +
-                                '<div class="btn-group btnClickable">' +
-                                '<button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></button>' +
-                                    '<ul class="dropdown-menu">' +
-                                        '<li><button class="dropdown-item editbtn" id=' + editIndex + '>Edit</button></li>' +
-                                        '<li><button class="dropdown-item deletebtn" id=' + editIndex + '>Delete</button></li>' +
-                                        '<li><hr class="dropdown-divider"></li>' +
-                                        '<li><button class="dropdown-item viewbtn" id=' + editIndex + '>View Details</button></li>' +
-                                    '</ul>' +
-                                '</div>' +
-                            '</td>'
-                        );
-                        console.log(editIndex,'editIndex 33')
+                        $('.tableBody > tr#' + editIndex).replaceWith(handleSubmit(fName,lName,mailId,editIndex));
                         personDetails = editArray;
                         setLocalData();
                         modalClose();
