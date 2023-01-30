@@ -80,11 +80,11 @@
                 <div class="modal-body">
                     <form class="detailsForm">
                         <div class="row">
-                            <div class="col-md-6">
+                            <!-- <div class="col-md-6">
                                 <label class="form-lable">ID</label>
                                 <input type="text" class="form-control mb-3 idInput">
-                            </div>
-                            <div class="col-md-6">
+                            </div> -->
+                            <div class="col-md-12">
                                 <label class="form-lable">USER ID</label>
                                 <input type="text" class="form-control mb-3 userIdInput">
                             </div>
@@ -124,14 +124,17 @@
                 modalOpen();
             })
             $('.modalCloseBtn').click(function() {
+                toggleVariable == false;
                 modalClose();
             })
-            let toggleVariable = false;
             // function for clear input value
             function clearInputValue() {
                 $('input').val('');
                 $('.discriptionInput').val('');
             }
+            let toggleVariable = false;
+            // array
+            let storeDataArray = '';
             // get data with ajax GET method
             function getData(){
                 $.ajax({
@@ -139,94 +142,119 @@
                     type: "GET",
                     dataType: 'json',
                     success: function successFn(result) {
-                        // append row with data in tablebody
-                        result.map((val,ind) => {
-                            $(".tableBody").append(
-                                '<tr id=' + ind +'>' +
-                                    '<td>' + val.id +'</td>' +
-                                    '<td>' + val.userId + '</td>' + 
-                                    '<td>' + val.title + '</td>' +
-                                    '<td>' + val.body + '</td>' + 
-                                    '<td>' + 
-                                        '<div class="btn-group ms-2">' +
-                                            '<button type="button" class="btn dropdown-toggle text-light" data-bs-toggle="dropdown" aria-expanded="false">' + 
-                                                '<i class="fa-solid fa-ellipsis"></i>' + 
-                                            '</button>' + 
-                                            '<ul class="dropdown-menu">' + 
-                                                '<li><a class="dropdown-item editBtn" href="javascript:void(0);" id=' + ind + '>EDIT</a></li>' + 
-                                                '<li><a class="dropdown-item deleteBtn" href="javascript:void(0);" id=' + ind + '>DELETE</a></li>' +
-                                            '</ul>' + 
-                                        '</div>' + 
-                                    '</td>' +
-                                '</tr>'
-                            );
-                        });
+                        storeDataArray = result;
+                        showData();
                     }
                 });
             }
             getData();
-            // let myArray = [];
-            // $.ajax({
-            //     url: "https://jsonplaceholder.typicode.com/posts",
-            //     type: "GET",
-            //     dataType: 'json',
-            //     success: function fnFn(result){
-            //         myArray = result;
-            //     }
-            // })
+            // function for append row in tablebody
+            function showData() {
+                storeDataArray.map((val,ind) => {
+                    const id = val.id;
+                    const userId = val.userId;
+                    const title = val.title;
+                    const body = val.body;
+                    $(".tableBody").append(
+                        repetedCode(ind,id,userId,title,body)
+                    );
+                });
+            }
+            // function for repeted code
+            function repetedCode(indexNum,id,userId,title,body) {
+                return '<tr id=' + indexNum +'>' +
+                    '<td>' + id +'</td>' +
+                    '<td>' + userId + '</td>' + 
+                    '<td>' + title + '</td>' +
+                    '<td>' + body + '</td>' + 
+                    '<td>' + 
+                        '<div class="btn-group ms-2">' +
+                            '<button type="button" class="btn dropdown-toggle text-light" data-bs-toggle="dropdown" aria-expanded="false">' + 
+                                '<i class="fa-solid fa-ellipsis"></i>' + 
+                            '</button>' + 
+                            '<ul class="dropdown-menu">' + 
+                                '<li><a class="dropdown-item editBtn" href="javascript:void(0);" id=' + indexNum + '>EDIT</a></li>' + 
+                                '<li><a class="dropdown-item deleteBtn" href="javascript:void(0);" id=' + indexNum + '>DELETE</a></li>' +
+                            '</ul>' + 
+                        '</div>' + 
+                    '</td>' +
+                '</tr>'
+            }
             // click event on edit button
             let newValue = '';
             $('.tableBody').on('click','.editBtn',function(event) {
-                const index = event.target.id;
                 toggleVariable = true;
-                $.ajax({
-                    url: "https://jsonplaceholder.typicode.com/posts",
-                    type: "GET",
-                    dataType: 'json',
-                    success: function(result){
-                        newValue = result.filter((val,ind) => {
-                            return index == ind
-                        })
-                        modalOpen();
-                        $('.idInput').val(newValue[0].id)
-                        $('.userIdInput').val(newValue[0].userId)
-                        $('.titleInput').val(newValue[0].title)
-                        $('.discriptionInput').val(newValue[0].body)
-                    }
-                });
+                const index = event.target.id;
+                newValue = storeDataArray.filter((val,ind) => {
+                    // console.log(ind,'ind')
+                    // console.log(index,'index')
+                    return index == ind
+                })
+                modalOpen();
+                console.log(newValue,'----------- newValue ------------')
+                // $('.idInput').val(newValue[0].id)
+                $('.userIdInput').val(newValue[0].userId)
+                $('.titleInput').val(newValue[0].title)
+                $('.discriptionInput').val(newValue[0].body)
             });
             $('.detailsForm').submit((event) => {
                 event.preventDefault();
                 const myObject = {
-                    'id': $('.idInput').val(),
+                    // 'id': $('.idInput').val(),
                     'userId': $('.userIdInput').val(),
                     'title': $('.titleInput').val(),
                     'body': $('.discriptionInput').val()
                 }
-                console.log(myObject,'obj')
                 $.ajax({
                     type: "POST",
                     url: "https://jsonplaceholder.typicode.com/posts",
                     dataType: 'json',
                     data: myObject,
-                    success: function () {
-                        $.get({
-                            type: "GET",
-                            url: "https://jsonplaceholder.typicode.com/posts",
-                            success: function(result){
-                                result.push(myObject);
-                                console.log(result,'-------------')
-                                getData();
-                            }
-                        })
+                    success: function (result) {
+                        if(toggleVariable == true){                                                       // working on this -------------------------------
+                            const arrayLength = storeDataArray.length;
+                            storeDataArray = storeDataArray.map((val,ind) => {
+                                if((newValue[0].id - 1) == (val.id - 1)){
+                                    console.log((newValue[0].id - 1),'-----newValue[0].id--------')
+                                    console.log((val.id - 1),'-----val.id--------')
+                                    return result
+                                }
+                                return val
+                            })
+                            console.log(storeDataArray,'arraylength==================')
+                            $('.tableBody > tr#' + (newValue[0].id - 1)).replaceWith(repetedCode(newValue[0].id,newValue[0].id,result.userId,result.title,result.body));
+                        }
+                        else{
+                            storeDataArray.push(result);
+                            const arrayLength = storeDataArray.length;
+                            $('.tableBody').append(
+                                repetedCode(result.id,arrayLength,result.userId,result.title,result.body)
+                            );
+                        }
+                        // updating index number.
+                        $('.tableBody > tr').each(function(ind,tr){
+                            $(tr).attr('id',ind).find('.dropdown-item').attr('id',ind);
+                        });
+                        modalClose();
                     }
                 });
             })
             // click event on delete button
-            // $('.tableBody').on('click','.deleteBtn',function(event) {
-            //     console.log(event,'innnddd')
-            //     console.log(event.target.id,'idddd')
-            // })
+            $('.tableBody').on('click','.deleteBtn',function(event) {
+                $.ajax({
+                    type: "DELETE",
+                    url: "https://jsonplaceholder.typicode.com/posts/1",
+                    dataType: 'json',
+                    success: function(result) {
+                        const index = event.target.id;
+                        $('.tableBody > tr#' + index).remove();
+                        // updating index number.
+                        $('.tableBody > tr').each(function(ind,tr){
+                            $(tr).attr('id',ind).find('.dropdown-item').attr('id',ind);
+                        });
+                    }
+                })
+            });
         })
     </script>
 </body>
