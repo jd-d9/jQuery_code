@@ -80,10 +80,6 @@
                 <div class="modal-body">
                     <form class="detailsForm">
                         <div class="row">
-                            <!-- <div class="col-md-6">
-                                <label class="form-lable">ID</label>
-                                <input type="text" class="form-control mb-3 idInput">
-                            </div> -->
                             <div class="col-md-12">
                                 <label class="form-lable">USER ID</label>
                                 <input type="text" class="form-control mb-3 userIdInput">
@@ -94,10 +90,10 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-lable">DISCRIPTION</label>
-                                <textarea class="form-control mb-3 discriptionInput" rows="4"></textarea>
+                                <textarea class="form-control mb-4 discriptionInput" rows="4"></textarea>
                             </div>
                             <div class="col-12">
-                                <button class="btn btn-warning text-white w-100">SUBMIT</button>
+                                <button class="btn btn-warning text-white w-100 mb-2 submitBtn">SUBMIT</button>
                             </div>
                         </div>
                     </form>
@@ -124,18 +120,19 @@
                 modalOpen();
             })
             $('.modalCloseBtn').click(function() {
-                toggleVariable == false;
                 modalClose();
             })
             // function for clear input value
             function clearInputValue() {
                 $('input').val('');
                 $('.discriptionInput').val('');
+                $('#staticBackdropLabel').text('Add Details');
+                $('.submitBtn').text('SUBMIT');
             }
             let toggleVariable = false;
             // array
             let storeDataArray = '';
-            // get data with ajax GET method
+            // get data with ajax GET method and show in tablebody
             function getData(){
                 $.ajax({
                     url: "https://jsonplaceholder.typicode.com/posts",
@@ -173,34 +170,32 @@
                                 '<i class="fa-solid fa-ellipsis"></i>' + 
                             '</button>' + 
                             '<ul class="dropdown-menu">' + 
-                                '<li><a class="dropdown-item editBtn" href="javascript:void(0);" id=' + indexNum + '>EDIT</a></li>' + 
-                                '<li><a class="dropdown-item deleteBtn" href="javascript:void(0);" id=' + indexNum + '>DELETE</a></li>' +
+                                '<li><a class="dropdown-item editBtn" href="javascript:void(0);" id=' + indexNum + '><i class="fa-solid fa-marker text-success me-2"></i>EDIT</a></li>' + 
+                                '<li><a class="dropdown-item deleteBtn" href="javascript:void(0);" id=' + indexNum + '><i class="fa-solid fa-trash text-danger me-2"></i>DELETE</a></li>' + 
                             '</ul>' + 
                         '</div>' + 
-                    '</td>' +
+                    '</td>' + 
                 '</tr>'
             }
             // click event on edit button
             let newValue = '';
+            let addIndex = '';
             $('.tableBody').on('click','.editBtn',function(event) {
                 toggleVariable = true;
-                const index = event.target.id;
+                addIndex = event.target.id;
                 newValue = storeDataArray.filter((val,ind) => {
-                    // console.log(ind,'ind')
-                    // console.log(index,'index')
-                    return index == ind
+                    return addIndex == ind
                 })
                 modalOpen();
-                console.log(newValue,'----------- newValue ------------')
-                // $('.idInput').val(newValue[0].id)
-                $('.userIdInput').val(newValue[0].userId)
-                $('.titleInput').val(newValue[0].title)
-                $('.discriptionInput').val(newValue[0].body)
+                $('.userIdInput').val(newValue[0].userId);
+                $('.titleInput').val(newValue[0].title);
+                $('.discriptionInput').val(newValue[0].body);
+                $('#staticBackdropLabel').text('Edit Details');
+                $('.submitBtn').text('UPDATE');
             });
             $('.detailsForm').submit((event) => {
                 event.preventDefault();
                 const myObject = {
-                    // 'id': $('.idInput').val(),
                     'userId': $('.userIdInput').val(),
                     'title': $('.titleInput').val(),
                     'body': $('.discriptionInput').val()
@@ -211,24 +206,23 @@
                     dataType: 'json',
                     data: myObject,
                     success: function (result) {
-                        if(toggleVariable == true){                                                       // working on this -------------------------------
-                            const arrayLength = storeDataArray.length;
+                        if(toggleVariable == true){
+                            addIndex = ++addIndex;
                             storeDataArray = storeDataArray.map((val,ind) => {
-                                if((newValue[0].id - 1) == (val.id - 1)){
-                                    console.log((newValue[0].id - 1),'-----newValue[0].id--------')
-                                    console.log((val.id - 1),'-----val.id--------')
+                                if(addIndex == val.id){
                                     return result
                                 }
                                 return val
-                            })
-                            console.log(storeDataArray,'arraylength==================')
-                            $('.tableBody > tr#' + (newValue[0].id - 1)).replaceWith(repetedCode(newValue[0].id,newValue[0].id,result.userId,result.title,result.body));
+                            });
+                            result.id = newValue[0].id;
+                            $('.tableBody > tr#' + (addIndex - 1)).replaceWith(repetedCode(addIndex,result.id,result.userId,result.title,result.body));
                         }
                         else{
                             storeDataArray.push(result);
                             const arrayLength = storeDataArray.length;
+                            result.id = arrayLength;
                             $('.tableBody').append(
-                                repetedCode(result.id,arrayLength,result.userId,result.title,result.body)
+                                repetedCode(arrayLength,arrayLength,result.userId,result.title,result.body)
                             );
                         }
                         // updating index number.
@@ -241,16 +235,20 @@
             })
             // click event on delete button
             $('.tableBody').on('click','.deleteBtn',function(event) {
+                const index = event.target.id;
                 $.ajax({
                     type: "DELETE",
-                    url: "https://jsonplaceholder.typicode.com/posts/1",
+                    url: "https://jsonplaceholder.typicode.com/posts/" + index,
                     dataType: 'json',
                     success: function(result) {
-                        const index = event.target.id;
                         $('.tableBody > tr#' + index).remove();
-                        // updating index number.
+                        storeDataArray.splice(index,1);
+                        // updating index number and id.
                         $('.tableBody > tr').each(function(ind,tr){
                             $(tr).attr('id',ind).find('.dropdown-item').attr('id',ind);
+                        });
+                        storeDataArray.map(function(val,id) {
+                            val.id = ++id
                         });
                     }
                 })
